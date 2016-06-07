@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-	char[] hostname = HOSTNAME;
+	char hostname[] = HOSTNAME;
 	int status=0; //used to check status of getaddrinfo
 	int port_num; //port number
 	int socket_fd; //the file descryptor for the socket we will use
@@ -34,6 +34,9 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in addr_client; //clients address struct
 	struct addrinfo addr_info; //the address info
 	struct addrinfo *addr_results; //the results of the address info
+	socklen_t size_addr;
+	int connected = 0;
+	std::string input;
 
 	//grab port parameter
 	port_num = atoi(argv[1]);
@@ -46,13 +49,13 @@ int main(int argc, char *argv[]){
 		addr_info.ai_flags = AI_PASSIVE; //use this machines ip
 
 		//get check that we got addr_info results
-		if((status=getaddrinfo(NULL, port_num, &addr_info,addr_results)) != 0){
+		if((status=getaddrinfo(NULL,argv[1], &addr_info, &addr_results)) != 0){
 			error("could not get addrinfo");
 		}
 
 	}
 	//get the results of addrinfo
-	else if((status=getaddrinfo(hostname, port_num, &addr_info,addr_results)) != 0){
+	else if((status = getaddrinfo(hostname, argv[1], &addr_info, &addr_results) ) != 0){
 		error("could not get addrinfo");
 	}
 
@@ -75,7 +78,7 @@ int main(int argc, char *argv[]){
 	//}
 
 	//listen to our socket
-	listen(socket_fd, BACKLOG)
+	listen(socket_fd, BACKLOG);
 
 	while(1){
 	//accept recieved connections
@@ -84,6 +87,26 @@ int main(int argc, char *argv[]){
 	if(socket_fd_client == -1){
 		continue;
 	}
-	std::cout << "server got a connection from "<< get_in_addr((struct sockaddr *)&addr_client) << std::endl;
+
+	//someone connected
+	std::cout << "server got a connection" << std::endl;
+
+	if((status = send(socket_fd_client, "you have connected\n",19,0)) == -1){
+		error("error sending");
 	}
+	connected = 1;
+	while(connected){
+		std::cin >> input;
+		if(input.compare("exit")==0){
+			break;
+		}
+		else if((status = send(socket_fd_client, input.c_str() ,strlen(input.c_str()),0)) == -1){
+			error("error sending");
+		}
+	}
+
+	break;
+	}
+
+	return 0;
 }

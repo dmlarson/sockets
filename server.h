@@ -5,6 +5,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <sys/wait.h>
+#include <string>
 
 #define PORT "44444"
 #define HOSTNAME "localhost"
